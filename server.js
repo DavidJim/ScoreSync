@@ -103,10 +103,8 @@ io.on("connection", (socket) => {
 	console.log(`Cliente conectado: ${socket.id}`);
 	// Unirse a un partido creado y mandar información a clientes
 	socket.on("unirsePartido", ({ idPartido }) => {
-		console.log("Me llega.... ", idPartido);
 		if (!partidos[idPartido]) {
-			console.log("error", { mensaje: "❌ Partido no encontrado" });
-			socket.emit("error", { mensaje: "❌ Partido no encontrado" });
+			socket.emit("errorNotFound", { mensaje: "❌ Partido no encontrado" });
 			return;
 		}
 
@@ -116,57 +114,10 @@ io.on("connection", (socket) => {
 
 	// Actualiza el resultado y lo manda a los clientes
 	socket.on("actualizaPartido", ({ idPartido, partido }) => {
-		console.log(idPartido, partido);
 		if (!partidos[idPartido]) return;
 
 		partidos[idPartido] = partido;
-		console.log(partidos[idPartido]);
 		io.to(idPartido).emit("infoPartido", partidos[idPartido]);
-	});
-	// Actualiza el resultado y lo manda a los clientes
-	socket.on("actualizaResultado", ({ idPartido, resultadoPartido }) => {
-		if (!partidos[idPartido]) return;
-
-		partidos[idPartido].resultadoPartido = resultadoPartido;
-		io.to(idPartido).emit("resultadoPartidoActualizado", resultadoPartido);
-	});
-
-	// Actualiza la información del partido y la manda a los clientes
-	socket.on("actualizaInformacionPartido", ({ idPartido, infoPartido }) => {
-		if (!partidos[idPartido]) return;
-
-		partidos[idPartido].infoPartido = {
-			...[idPartido].infoPartido,
-			...infoPartido,
-		};
-		io.to(idPartido).emit("infoPartidoActualizado", [idPartido].infoPartido);
-	});
-
-	// Actualiza la información de partners del partido y la manda a los clientes
-	socket.on("actualizaPartnersPartido", ({ idPartido, partnersPartido }) => {
-		if (!partidos[idPartido]) return;
-
-		partidos[idPartido].partnersPartido = partnersPartido;
-		io.to(idPartido).emit("infoPartnersActualizado", partnersPartido);
-	});
-
-	// Actualiza la modalidad del partido y la manda a los clientes
-	socket.on("actualizaModalidadPartido", ({ idPartido, dobles }) => {
-		if (!partidos[idPartido]) return;
-
-		partidos[idPartido].dobles = dobles;
-		io.to(idPartido).emit("infoModalidadActualizada", dobles);
-	});
-
-	// Actualiza la información si es un partido de liga y la manda a los clientes
-	socket.on("actualizaInfoLiga", ({ idPartido, infoLiga }) => {
-		if (!partidos[idPartido]) return;
-
-		partidos[idPartido].infoLiga = {
-			...partidos[idPartido].infoLiga,
-			...infoLiga,
-		};
-		io.to(idPartido).emit("infoLigaActualizada", [idPartido].infoLiga);
 	});
 
 	// Desconexión de cliente
@@ -176,6 +127,6 @@ io.on("connection", (socket) => {
 });
 
 // Iniciar servidor
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
 	console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
